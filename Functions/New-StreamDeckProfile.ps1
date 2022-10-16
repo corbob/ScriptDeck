@@ -84,7 +84,7 @@
     [Parameter(ValueFromPipelineByPropertyName)]
     [string]
     $Version = '1.0',
-    
+
     # The profile UUID.  If not provided, a GUID will be generated.
     [Parameter(ValueFromPipelineByPropertyName)]
     [string]
@@ -114,20 +114,20 @@
         #region Discover Device Model/UUID
         if ($DeviceModel -notmatch '\d{2,}') {
             # If the device model did not contain a set of digits
-            $DeviceModel = 
+            $DeviceModel =
                 switch ($DeviceModel) { # assume it's a friendly name.  Convert that to it's system name.
                     StreamDeck       { '20GAA9902'  }
-                    StreamDeckXL     { '20GAT9901'  } 
-                    StreamDeckMini   { '20GAI9901'  } 
+                    StreamDeckXL     { '20GAT9901'  }
+                    StreamDeckMini   { '20GAI9901'  }
                     StreamDeckMobile { 'VSD/WiFi'   }
                     default          { $DeviceModel }
                 }
-                
+
             if (-not $DeviceUUID) { # If we do not know the DeviceUUID
                 $profiles = Get-StreamDeckProfile
-                $DeviceUUID = 
-                    $profiles | 
-                        Where-Object DeviceModel -EQ $DeviceModel | 
+                $DeviceUUID =
+                    $profiles |
+                        Where-Object DeviceModel -EQ $DeviceModel |
                         Select-Object -ExpandProperty DeviceUUID  -First 1
             }
         }
@@ -154,7 +154,7 @@
             DeviceModel=$DeviceModel
             DeviceUUID=$DeviceUUID
             Guid = if (-not $ProfileUUID) {
-                [Guid]::NewGuid().ToString() 
+                [Guid]::NewGuid().ToString()
             } else { "$ProfileUUID" }
             Actions=[Ordered]@{}
             PSTypeName = 'StreamDeck.Profile'
@@ -167,7 +167,7 @@
         }
 
         #region Determine Profile Root
-        if (-not $ProfileRoot) {        
+        if (-not $ProfileRoot) {
             $profileRoot=
                 if ((-not $PSVersionTable.Platform) -or ($PSVersionTable.Platform -match 'Win')) {
                     "$env:AppData\Elgato\StreamDeck\ProfilesV2\"
@@ -194,7 +194,7 @@
         }
 
         if ($IsNextPage) {
-            $row = 
+            $row =
                 if ($DeviceModel -in '20GAA9901', '20GAA9902', 'VSD/WiFi') {
                     2
                 }

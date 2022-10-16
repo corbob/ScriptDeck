@@ -73,7 +73,7 @@
                 }
             }
         } else {
-            if ($name -eq $ProfileRoot -or $ProfileRoot -like "*$name") { 
+            if ($name -eq $ProfileRoot -or $ProfileRoot -like "*$name") {
                 $name = ''
             }
             Get-ChildItem -Path $ProfileRoot -Filter manifest.json -Recurse:$Recurse |

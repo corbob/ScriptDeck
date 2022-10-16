@@ -7,7 +7,7 @@
         Exports one or more Stream Deck plguins
     .Link
         Get-StreamDeckPlugin
-    .Example        
+    .Example
         Export-StreamDeckPlugin -PluginPath (Get-Module ScriptDeck | Split-Path | Join-Path -ChildPath "ScriptDeck.sdPlugin")
     #>
     [OutputType([IO.FileInfo])]
@@ -33,13 +33,13 @@
     begin {
         $distroToolUrlRoot = 'https://developer.elgato.com/documentation/stream-deck/distributiontool'
         if (-not $DistributionToolRoot) {
-            
-            $DistributionToolRoot = 
+
+            $DistributionToolRoot =
                 if ((-not $PSVersionTable.Platform) -or ($PSVersionTable.Platform -match 'Win')) {
                     $distroToolUrl =  "$distroToolUrlRoot/DistributionToolWindows.zip"
                     Join-Path "$env:AppData\Elgato\StreamDeck\" -ChildPath Tools
-                    
-                    
+
+
                 } elseif ($PSVersionTable.Platform -eq 'Unix') {
                     $distroToolUrl =  "$distroToolUrlRoot/DistributionToolMac.zip"
                     if ($PSVersionTable.OS -like '*darwin*' -and -not $env:GITHUB_WORKSPACE) {
@@ -59,12 +59,12 @@
         if (-not (Test-Path $DistributionToolRoot)) {
             New-Item -ItemType Directory -Path $DistributionToolRoot -Force
         }
-        
+
         if (-not ('IO.Compression.ZipFile' -as [type])) {
             Add-Type -AssemblyName System.IO.Compression.Filesystem
         }
 
-        $distroToolExe = 
+        $distroToolExe =
             Get-ChildItem -Path $DistributionToolRoot -ErrorAction SilentlyContinue -Filter DistributionTool* | Sort-Object Length | Select-Object -First 1
 
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -75,9 +75,9 @@
             }
             [Net.WebClient]::new().DownloadFile($distroToolUrl, "$distroZipPath")
             [IO.Compression.ZipFile]::ExtractToDirectory("$distroZipPath", "$DistributionToolRoot")
-            $distroToolExe = 
+            $distroToolExe =
                 Get-ChildItem -Path $DistributionToolRoot -ErrorAction SilentlyContinue -Filter DistributionTool* | Sort-Object Length | Select-Object -First 1
-        }            
+        }
     }
 
     process {
@@ -90,13 +90,13 @@
         #region Export Profiles
         foreach ($sdp in $sdplugins) {
             # $sdpOutputDirectory = Join-Path $outputPath "$($sdp.Name)_sdPlugin" | Join-Path -ChildPath "$($sdp.Name.ToLower()).sdPlugin"
-            $sdpOutputPath      = Join-Path $OutputPath "$(($sdp.Name -replace '\s').ToLower()).streamDeckPlugin"            
+            $sdpOutputPath      = Join-Path $OutputPath "$(($sdp.Name -replace '\s').ToLower()).streamDeckPlugin"
             $sdPluginRoot = ($sdp.PluginPath | Split-path)
             $sdPluginRootName = $sdPluginRoot | Split-Path -Leaf
 
             $sdpOutputPath = Join-Path $OutputPath "$($sdPluginRootName -replace '\.sdPlugin$').streamDeckPlugin"
             if ((Test-Path $sdpOutputPath)) {
-                if (-not $Force) { continue }                
+                if (-not $Force) { continue }
                 Remove-Item -Path $sdpOutputPath
             }
             if ($env:GITHUB_WORKSPACE) {
@@ -111,13 +111,13 @@
             } else {
                 $movedFiles = Get-ChildItem -Path $sdPluginRoot -Filter *.ps1.json | Move-Item -Destination '..' -PassThru
             }
-            $lines = & $distroToolExe.Fullname -b -i $sdPluginRoot -o $OutputPath 
+            $lines = & $distroToolExe.Fullname -b -i $sdPluginRoot -o $OutputPath
             if ($env:GITHUB_WORKSPACE) {
                 $lines | Out-Host
             }
             $hadErrorLines = $false
             foreach ($line in $lines) {
-                Write-Verbose "$line"                    
+                Write-Verbose "$line"
                 if ($line -like '*Error:*') {
                     $useless, $useful = $line -split 'Error\:\s{0,}'
                     $hadErrorLines = $true
@@ -126,7 +126,7 @@
             }
 
             if ($movedFiles) {
-                $movedFiles | Move-Item -Destination { 
+                $movedFiles | Move-Item -Destination {
                     Join-Path $sdPluginRoot "$_.Name"
                 }
             }
@@ -149,4 +149,3 @@
         #endregion Export Profiles
     }
 }
-

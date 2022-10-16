@@ -44,8 +44,8 @@
     )
 
     begin {
-        filter manifest.json=>[StreamDeck.Plugin] {            
-            $inFile = $_            
+        filter manifest.json=>[StreamDeck.Plugin] {
+            $inFile = $_
             try {
                 $jsonObject = ConvertFrom-Json ([IO.File]::ReadAllText($inFile.Fullname))
                 $jsonObject.pstypenames.clear()
@@ -54,7 +54,7 @@
                 $jsonObject
             } catch {
                 Write-Error -ErrorRecord $_
-            }            
+            }
         }
         ${?<PluginTemplate>} = 'StreamDeckPluginTemplate\.ps1$'
         filter .ps1=>[StreamDeck.PluginTemplate] {
@@ -70,13 +70,13 @@
         if ($PSCmdlet.ParameterSetName -eq 'PluginTemplate') {
             if ($Force -or -not $Script:CachedStreamDeckPluginTemplates) {
                 $Script:CachedStreamDeckPluginTemplates = @($MyInvocation.MyCommand.Module |
-                    Split-Path | 
+                    Split-Path |
                     Get-ChildItem -Filter *.ps1 |
                     Where-Object Name -Match ${?<PluginTemplate>} |
                     .ps1=>[StreamDeck.PluginTemplate])
             }
 
-            $templateList = 
+            $templateList =
                 if (-not $PluginPath) {
                     @() + $Script:CachedStreamDeckPluginTemplates
                 } else {
@@ -85,9 +85,9 @@
                                 .ps1=>[StreamDeck.PluginTemplate]
                     } else {
                         Get-ChildItem -Path $PluginPath -Recurse -Filter *.ps1  |
-                            Where-Object Name -Match ${?<PluginTemplate>} |                        
+                            Where-Object Name -Match ${?<PluginTemplate>} |
                             .ps1=>[StreamDeck.PluginTemplate]
-                    }) 
+                    })
                 }
 
             if ($name) {
@@ -97,10 +97,10 @@
             }
             return
         }
-        
+
         #region Cache StreamDeck Plugins
         if ($force -or -not $Script:CachedStreamDeckPlugins) {
-            
+
             $Script:CachedStreamDeckPlugins = @(
                 # On Windows, plugins can be in
                 if ((-not $PSVersionTable.Platform) -or ($PSVersionTable.Platform -match 'Win')) {
@@ -127,7 +127,7 @@
             )
         }
         #endregion Cache StreamDeck Plugins
-        $pluginList = 
+        $pluginList =
             if (-not $PluginPath) {
                 @() + $Script:CachedStreamDeckPlugins
             } else {
@@ -135,11 +135,11 @@
                     Get-ChildItem -Path $pluignPath |
                             manifest.json=>[StreamDeck.Plugin]
                 } else {
-                    Get-ChildItem -Path $PluginPath -Recurse -Filter manifest.json  |                        
+                    Get-ChildItem -Path $PluginPath -Recurse -Filter manifest.json  |
                         manifest.json=>[StreamDeck.Plugin]
-                }) 
+                })
             }
-            
+
 
 
         if ($Name -or $UUID) {

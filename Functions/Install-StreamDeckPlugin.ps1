@@ -4,7 +4,7 @@
     .Synopsis
         Installs a Stream Deck Plugin
     .Description
-        Installs a Stream Deck Plugin.  This copies the files in the plugin directory to the 
+        Installs a Stream Deck Plugin.  This copies the files in the plugin directory to the
     .Example
         Install-StreamDeckPlugin -SourcePath .\ScriptDeck.sdPlugin
     .Link
@@ -18,7 +18,7 @@
     $SourcePath,
 
     # The destination path.  This will usually be automatically detected based off of the operating system.
-    [Parameter(ValueFromPipelineByPropertyName)]    
+    [Parameter(ValueFromPipelineByPropertyName)]
     [string]
     $DestinationPath,
 
@@ -28,19 +28,19 @@
     )
 
     process {
-                
+
         if (-not $DestinationPath) { # If no -DestinationPath was provided
-            $DestinationPath = 
+            $DestinationPath =
                 if ((-not $PSVersionTable.Platform) -or ($PSVersionTable.Platform -match 'Win')) {
                     # use AppData if it's windows
                     "$env:AppData\Elgato\StreamDeck\Plugins\"
-                } elseif ($PSVersionTable.Platform -eq 'Unix') {                    
+                } elseif ($PSVersionTable.Platform -eq 'Unix') {
                     # or the library if it is a Mac
                     "~/Library/Application Support/elgato/StreamDeck/Plugins"
                 }
 
             if (-not $DestinationPath) { # If we could not determine the -DestinationPath
-                Write-Error "Could not determine -DestinationPath." -ErrorId StreamDeck.Destination.Missing 
+                Write-Error "Could not determine -DestinationPath." -ErrorId StreamDeck.Destination.Missing
                 return # error out.
             }
         }
@@ -73,7 +73,7 @@
             }
             # Extract the plugin to that directory
             [IO.Compression.ZipFile]::ExtractToDirectory($sourcePathItem.fullname, $sourceTempDir)
-           
+
             # Get ready to call yourself
             $MySplat = @{} + $PSBoundParameters
             $MySplat.Remove('SourcePath')
@@ -102,7 +102,7 @@
                 $sourcePathItem.Name.Replace("$($sourcePathItem.Extension)",'') + '.sdPlugin'
             ) # determine the right .sdPlugin path
             if (-not (Test-Path $newDestPath)) {
-                $createdDirectory = New-Item -ItemType Directory -Path $newDestPath 
+                $createdDirectory = New-Item -ItemType Directory -Path $newDestPath
                 if (-not $createdDirectory) {
                     Write-Error "Could not create plugin directory: '$newDestPath'"
                     return
@@ -111,16 +111,16 @@
             $resolvedDestinationPath = $newDestPath
         }
 
-       
+
         # Get all of the files from source, recursively.
         $pluginFiles = @(Get-ChildItem $sourcePathItem -Recurse)
         $c, $t = 0, $pluginFiles.Length
         $progressId  = Get-Random
         foreach ($pluginFile in $pluginFiles) {
-            # determine it's relative path,        
+            # determine it's relative path,
             $relativePath = $pluginFile.FullName.Replace("$($sourcePathItem.Fullname)$([IO.Path]::DirectorySeparatorChar)", "")
             $newPath = Join-Path $resolvedDestinationPath $relativePath
-            $null = 
+            $null =
                 try {
                     # create the directory structure with New-Item -Force,
                     New-Item -ItemType $(
